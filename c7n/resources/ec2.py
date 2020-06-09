@@ -425,7 +425,27 @@ class ImageAge(AgeFilter, InstanceImageBase):
 
 @filters.register('image')
 class InstanceImage(ValueFilter, InstanceImageBase):
+    """ Filter on any attribute of an instance's image
 
+    :Example:
+
+    .. code-block:: yaml
+
+        policies:
+          - name: stop-instances-with-third-party-image-owners
+            resource: ec2
+            filters:
+                - type: value
+                  op: not-in
+                  key: OwnerId
+                  value:
+                    - '012345678901'
+                    - '012345678901'
+                    - '012345678901'
+
+            actions:
+              - stop
+    """
     schema = type_schema('image', rinherit=ValueFilter.schema)
     schema_alias = False
 

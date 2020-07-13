@@ -153,9 +153,23 @@ CONFIG_SCHEMA = {
 
 
 def session_factory(mailer_config):
-    return boto3.Session(
+    session =  boto3.Session(
         region_name=mailer_config['region'],
         profile_name=mailer_config.get('profile', None))
+
+    if 'role' in mailer_config:
+        sts = boto3.client('sts')
+        assume_result = sts.assume_role(
+            RoleArn=mailer_config['role'],
+            RoleSessionName='Custodian-Notifications')
+        session = boto3.Session(
+            aws_access_key_id = assume_result['Credentials']['AccessKeyId'],
+            aws_secret_access_key =assume_result['Credentials']['SecretAccessKey'],
+            aws_session_token = assume_result['Credentials']['SessionToken'],
+        )
+
+    return session
+
 
 
 def get_logger(debug=False):
